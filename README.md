@@ -12,6 +12,7 @@
     </div>
   </div>
 
+
   <h2>Overview</h2>
   <p>This repository contains a straightforward script that:</p>
   <ul>
@@ -25,8 +26,7 @@
   <p>The image below is embedded directly (base64 PNG). It typically shows sample predictions produced after training.</p>
 
   <figure>
-    <img alt="EMNIST sample predictions" src="
-    " />
+   <img width="950" height="454" alt="output" src="https://github.com/user-attachments/assets/ede7523b-44b9-4a8d-86d8-47e8a90b7677" />
     <figcaption>Sample predictions and training output (embedded PNG)</figcaption>
   </figure>
 
