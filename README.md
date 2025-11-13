@@ -1,136 +1,71 @@
-<h1>EMNIST Balanced — Character Classification using ANN (TensorFlow)</h1>
 
-<p>
-This project trains a Fully Connected Neural Network (ANN / MLP) on the 
-<strong>EMNIST Balanced</strong> dataset using <strong>TensorFlow</strong> 
-and <strong>TensorFlow Datasets (TFDS)</strong>.  
-The model learns to classify 47 different characters including digits, letters, and symbols.
-</p>
 
-<hr>
+  <div class="hero">
+    <h1>EMNIST Balanced — Character Classification using ANN (TensorFlow)</h1>
+    <p>
+      A simple fully-connected neural network (MLP) example that trains on the
+      <strong>EMNIST Balanced</strong> dataset using <strong>TensorFlow</strong> and <strong>tensorflow-datasets</strong>.
+    </p>
+    <div>
+      <span class="badge">Dataset: EMNIST Balanced</span>
+      <span class="badge">Model: MLP (Dense)</span>
+    </div>
+  </div>
 
-<h2>📦 Requirements</h2>
+  <h2>Overview</h2>
+  <p>This repository contains a straightforward script that:</p>
+  <ul>
+    <li>loads <code>emnist/balanced</code> from TFDS</li>
+    <li>normalizes and flattens 28×28 images → 784 features</li>
+    <li>trains an MLP: Dense(512) → Dropout → Dense(256) → Dropout → Dense(num_classes)</li>
+    <li>evaluates on the test split and visualizes sample predictions</li>
+  </ul>
 
-<pre><code>pip install tensorflow tensorflow-datasets matplotlib numpy
-</code></pre>
+  <h2>Rendered sample output</h2>
+  <p>The image below is embedded directly (base64 PNG). It typically shows sample predictions produced after training.</p>
 
-<hr>
+  <figure>
+    <img alt="EMNIST sample predictions" src="
+    " />
+    <figcaption>Sample predictions and training output (embedded PNG)</figcaption>
+  </figure>
 
-<h2>📂 Dataset</h2>
+  <h2>Quick start</h2>
+  <ol>
+    <li>Create a virtual environment and install dependencies:
+      <pre><code>pip install tensorflow tensorflow-datasets matplotlib numpy</code></pre>
+    </li>
+    <li>Run the training script (example):
+      <pre><code>python emnist_mlp.py --epochs 10 --batch_size 128</code></pre>
+    </li>
+    <li>View the printed evaluation result and sample prediction figure (the image above is one example output).</li>
+  </ol>
 
-<p>The dataset is loaded using:</p>
-
-<pre><code>ds_train, ds_test, ds_info = tfds.load(
-    'emnist/balanced',
-    split=['train', 'test'],
-    shuffle_files=True,
-    as_supervised=True,
-    with_info=True
-)
-</code></pre>
-
-<ul>
-  <li>131,600 training samples</li>
-  <li>18,800 test samples</li>
-  <li>47 classes (digits + merged letters)</li>
-</ul>
-
-<hr>
-
-<h2>🧹 Preprocessing</h2>
-
-<p>Each image is normalized and flattened from <strong>28×28 → 784</strong>:</p>
-
-<pre><code>def normalize_img(image, label):
+  <h2>Preprocessing snippet</h2>
+  <pre><code>def normalize_img(image, label):
     image = tf.cast(image, tf.float32) / 255.0
-    image = tf.reshape(image, [-1])
+    image = tf.reshape(image, (-1,))  # flatten to 784
     return image, label
-</code></pre>
+  </code></pre>
 
-<hr>
+  <h2>Model snippet</h2>
+  <pre><code>model = Sequential([
+  Input(shape=(28*28,)),
+  Dense(512, activation='relu'),
+  Dropout(0.3),
+  Dense(256, activation='relu'),
+  Dropout(0.3),
+  Dense(num_classes, activation='softmax')
+])
+model.compile(optimizer='adam',
+              loss='sparse_categorical_crossentropy',
+              metrics=['accuracy'])</code></pre>
 
-<h2>🧠 Model Architecture</h2>
+  <h2>Notes & improvements</h2>
+  <ul>
+    <li>For better accuracy, replace the MLP with a small CNN (Conv2D→Pool→Dense).</li>
+    <li>EMNIST sometimes requires rotating/transposing images depending on split — verify orientation before using in production.</li>
+    <li>Add model checkpointing: <code>model.save(...)</code> or <code>tf.keras.callbacks.ModelCheckpoint</code>.</li>
+  </ul>
 
-<pre><code>Input (784)
-↓
-Dense(512, relu) + Dropout(0.3)
-↓
-Dense(256, relu) + Dropout(0.3)
-↓
-Dense(47, softmax)
-</code></pre>
 
-<p>Compiled using:</p>
-
-<pre><code>model.compile(
-    optimizer='adam',
-    loss='sparse_categorical_crossentropy',
-    metrics=['accuracy']
-)
-</code></pre>
-
-<hr>
-
-<h2>🚀 Training</h2>
-
-<pre><code>history = model.fit(
-    ds_train,
-    epochs=10,
-    validation_data=ds_test
-)
-</code></pre>
-
-<hr>
-
-<h2>📈 Evaluation</h2>
-
-<pre><code>test_loss, test_acc = model.evaluate(ds_test)
-print(f"Test Accuracy: {test_acc*100:.2f}%")
-</code></pre>
-
-<p><strong>Typical accuracy:</strong> ~86–89%</p>
-
-<hr>
-
-<h2>📊 Predictions</h2>
-
-<p>The script displays 10 sample predictions:</p>
-
-<pre><code>for images, labels in ds_test.take(1):
-    preds = model.predict(images)
-    preds_cls = np.argmax(preds, axis=1)
-</code></pre>
-
-<p>Visualized using:</p>
-
-<pre><code>plt.imshow(tf.reshape(images[i], (28, 28)), cmap='gray')
-plt.title(f"True: {labels[i].numpy()} | Pred: {preds_cls[i]}")
-</code></pre>
-
-<hr>
-
-<h2>📁 Project Structure</h2>
-
-<pre><code>📦 EMNIST-MLP
- ┣ 📄 README.md
- ┣ 📄 emnist_mlp.py
- ┗ 📄 requirements.txt
-</code></pre>
-
-<hr>
-
-<h2>🔮 Improvements</h2>
-
-<ul>
-  <li>Use a CNN for better accuracy</li>
-  <li>Add TensorBoard logs</li>
-  <li>Add learning curves</li>
-  <li>Save and load trained models</li>
-  <li>Add confusion matrix</li>
-</ul>
-
-<hr>
-
-<h2>📝 License</h2>
-
-<p>Open-source under the <strong>MIT License</strong>.</p>
